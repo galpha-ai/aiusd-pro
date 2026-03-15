@@ -1,0 +1,58 @@
+{
+  "name": "aiusd-pro",
+  "version": "0.1.6",
+  "description": "AIUSD Pro — AI-powered trading agent with built-in reasoning.",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "aiusd-pro": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x dist/index.js",
+    "dev": "tsx src/index.ts",
+    "clean": "rm -rf dist",
+    "setup": "node scripts/skill-init.cjs",
+    "postinstall": "node scripts/skill-init.cjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/**/*",
+    "scripts/",
+    "package.json",
+    "SKILL.md"
+  ],
+  "agents": {
+    "skills": [
+      {
+        "name": "aiusd-pro",
+        "path": "./"
+      }
+    ]
+  },
+  "keywords": [
+    "agent-skill",
+    "aiusd",
+    "trading",
+    "natural-language"
+  ],
+  "author": "AIUSD",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/galpha-ai/aiusd-pro.git"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "ws": "^8.18.0",
+    "undici": "^6.0.0",
+    "ethers": "^6.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/ws": "^8.5.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0"
+  }
+}
