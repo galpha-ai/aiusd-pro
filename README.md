@@ -108,7 +108,7 @@ aiusd-pro cancel                # Cancel active operation
 |---|------|-----|
 | **Inference** | Client-side LLM | Managed backend agent |
 | **Interface** | Structured CLI commands | Natural language |
-| **AI tokens** | None | Uses platform tokens |
+| **Inference cost** | None — bring your own LLM | Included |
 | **Best for** | Developers building custom agents | End users and turnkey integrations |
 
 ## Security
