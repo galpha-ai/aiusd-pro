@@ -1,3 +1,4 @@
+import { createRequire } from 'module';
 import { Command } from 'commander';
 import { TokenManager } from './token-manager.js';
 import { sendMessage, cancelRun } from './agent-client.js';
@@ -5,6 +6,9 @@ import { SessionManager } from './session-manager.js';
 import { getCurrentSession, setCurrentSession } from './session-store.js';
 import { config } from './config.js';
 import { unlinkSync } from 'fs';
+
+const require = createRequire(import.meta.url);
+const { version: PKG_VERSION } = require('../package.json');
 
 function extractUserId(token: string): string {
   const parts = token.split('.');
@@ -22,9 +26,9 @@ export function createCli(): Command {
   const program = new Command();
 
   program
-    .name('aiusd-nl')
+    .name('aiusd-pro')
     .description('AIUSD Natural Language Agent CLI')
-    .version('0.1.0');
+    .version(PKG_VERSION);
 
   // -- send --
   program
@@ -38,7 +42,7 @@ export function createCli(): Command {
       // 1. Get token
       const bearerToken = await TokenManager.ensureToken();
       if (!bearerToken) {
-        process.stderr.write('Not logged in. Run: aiusd-nl login --browser\n');
+        process.stderr.write('Not logged in. Run: aiusd-pro login --browser\n');
         process.exit(1);
       }
 
@@ -49,7 +53,7 @@ export function createCli(): Command {
       let sessionId = opts.session || getCurrentSession();
       if (!sessionId) {
         const mgr = new SessionManager(userId, rawToken);
-        const session = await mgr.createSession('aiusd-nl');
+        const session = await mgr.createSession('aiusd-pro');
         sessionId = session.id;
         setCurrentSession(sessionId);
       }
@@ -74,7 +78,7 @@ export function createCli(): Command {
         if (msg.includes('returned 403') && !opts.session) {
           process.stderr.write('Session expired, creating new session...\n');
           const mgr = new SessionManager(userId, rawToken);
-          const newSession = await mgr.createSession('aiusd-nl');
+          const newSession = await mgr.createSession('aiusd-pro');
           sessionId = newSession.id;
           setCurrentSession(sessionId);
           try {
@@ -141,7 +145,7 @@ export function createCli(): Command {
           },
         }));
       } else {
-        process.stderr.write('Usage: aiusd-nl login --browser | --poll-session <id> | --new-wallet\n');
+        process.stderr.write('Usage: aiusd-pro login --browser | --poll-session <id> | --new-wallet\n');
         process.exit(1);
       }
     });
@@ -171,13 +175,13 @@ export function createCli(): Command {
     .action(async (opts: { title?: string }) => {
       const bearerToken = await TokenManager.ensureToken();
       if (!bearerToken) {
-        process.stderr.write('Not logged in. Run: aiusd-nl login --browser\n');
+        process.stderr.write('Not logged in. Run: aiusd-pro login --browser\n');
         process.exit(1);
       }
       const rawToken = stripBearer(bearerToken);
       const userId = extractUserId(rawToken);
       const mgr = new SessionManager(userId, rawToken);
-      const s = await mgr.createSession(opts.title || 'aiusd-nl');
+      const s = await mgr.createSession(opts.title || 'aiusd-pro');
       setCurrentSession(s.id);
       console.log(`Session created: ${s.id}`);
     });
@@ -189,7 +193,7 @@ export function createCli(): Command {
     .action(async (opts: { limit: string }) => {
       const bearerToken = await TokenManager.ensureToken();
       if (!bearerToken) {
-        process.stderr.write('Not logged in. Run: aiusd-nl login --browser\n');
+        process.stderr.write('Not logged in. Run: aiusd-pro login --browser\n');
         process.exit(1);
       }
       const rawToken = stripBearer(bearerToken);
@@ -212,13 +216,13 @@ export function createCli(): Command {
     .action(async () => {
       const bearerToken = await TokenManager.ensureToken();
       if (!bearerToken) {
-        process.stderr.write('Not logged in. Run: aiusd-nl login --browser\n');
+        process.stderr.write('Not logged in. Run: aiusd-pro login --browser\n');
         process.exit(1);
       }
       const rawToken = stripBearer(bearerToken);
       const userId = extractUserId(rawToken);
       const mgr = new SessionManager(userId, rawToken);
-      const s = await mgr.createSession('aiusd-nl');
+      const s = await mgr.createSession('aiusd-pro');
       setCurrentSession(s.id);
       console.log(`New session: ${s.id}`);
     });
@@ -230,7 +234,7 @@ export function createCli(): Command {
     .action(async () => {
       const bearerToken = await TokenManager.ensureToken();
       if (!bearerToken) {
-        process.stderr.write('Not logged in. Run: aiusd-nl login --browser\n');
+        process.stderr.write('Not logged in. Run: aiusd-pro login --browser\n');
         process.exit(1);
       }
       const sessionId = getCurrentSession();

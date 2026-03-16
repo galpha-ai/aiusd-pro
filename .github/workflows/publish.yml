@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,6 +38,23 @@ jobs:
           git push origin main --tags
 
       - name: Publish to npm
-        run: npm publish --access public
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create .skill archive
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          SKILL_DIR=$(mktemp -d)
+          cp -r dist scripts package.json package-lock.json SKILL.md "$SKILL_DIR/"
+          cd "$SKILL_DIR"
+          tar czf /tmp/aiusd-pro.skill .
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release
+        run: |
+          gh release create "v${VERSION}" /tmp/aiusd-pro.skill \
+            --title "v${VERSION}" \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

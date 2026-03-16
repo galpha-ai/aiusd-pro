@@ -1,6 +1,6 @@
 {
   "name": "aiusd-pro",
-  "version": "0.1.8",
+  "version": "1.0.0",
   "description": "AIUSD Pro — AI-powered trading agent with built-in reasoning.",
   "type": "module",
   "main": "dist/index.js",
