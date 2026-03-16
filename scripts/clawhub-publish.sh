@@ -1,22 +1,41 @@
 #!/usr/bin/env bash
-# Publish aiusd-pro skill to ClawHub
-# Usage: bash scripts/clawhub-publish.sh
+# Build a temporary directory for uploading to ClawHub.
+#
+# ClawHub CLI token auth is currently broken (github.com/openclaw/clawhub#72),
+# so we build the upload folder and publish manually via https://clawhub.ai/upload.
+#
+# Usage:
+#   bash scripts/clawhub-publish.sh
+#
+# After running, upload the printed directory at https://clawhub.ai/upload.
+# Once the CLI auth issue is resolved, uncomment the clawhub publish line below.
+
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VERSION=$(node -p "require('$ROOT/package.json').version")
-TMPDIR=$(mktemp -d)
-trap 'rm -rf "$TMPDIR"' EXIT
+OUTDIR="$ROOT/clawhub-upload"
 
-# Copy SKILL.md only (aiusd-pro has no sub-skill files)
-cp "$ROOT/SKILL.md" "$TMPDIR/SKILL.md"
+rm -rf "$OUTDIR"
+mkdir -p "$OUTDIR"
 
-echo "Publishing aiusd-pro v${VERSION} to ClawHub..."
-npx -y clawhub publish "$TMPDIR" \
-  --slug aiusd-pro \
-  --name "AIUSD Pro" \
-  --version "$VERSION" \
-  --tags latest \
-  --registry https://www.clawhub.ai
+cp "$ROOT/SKILL.md" "$OUTDIR/SKILL.md"
 
-echo "Done."
+echo "ClawHub upload directory ready: $OUTDIR"
+echo "Version: $VERSION"
+echo ""
+echo "Next steps:"
+echo "  1. Go to https://clawhub.ai/upload"
+echo "  2. Select folder: $OUTDIR"
+echo "  3. Fill in version: $VERSION"
+echo "  4. Publish"
+echo ""
+echo "To clean up after publishing: rm -rf $OUTDIR"
+
+# Uncomment when CLI auth is fixed:
+# npx -y clawhub publish "$OUTDIR" \
+#   --slug aiusd-pro \
+#   --name "AIUSD Pro" \
+#   --version "$VERSION" \
+#   --tags latest \
+#   --registry https://www.clawhub.ai
