@@ -15,20 +15,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install ClawHub CLI
-        run: npm install -g clawhub
-
       - name: Authenticate
-        run: clawhub login --token "$CLAWHUB_TOKEN" --no-browser
+        run: npx -y clawhub login --token "$CLAWHUB_TOKEN" --no-browser --registry https://www.clawhub.ai
         env:
           CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
-          CLAWHUB_REGISTRY: https://www.clawhub.ai
 
       - name: Publish skill
         run: |
           VERSION=$(node -p "require('./package.json').version")
           TMPDIR=$(mktemp -d)
           cp SKILL.md "$TMPDIR/SKILL.md"
-          clawhub publish "$TMPDIR" --slug aiusd-pro --name "AIUSD Pro" --version "$VERSION" --tags latest --no-input
-        env:
-          CLAWHUB_REGISTRY: https://www.clawhub.ai
+          npx -y clawhub publish "$TMPDIR" --slug aiusd-pro --name "AIUSD Pro" --version "$VERSION" --tags latest --no-input --registry https://www.clawhub.ai

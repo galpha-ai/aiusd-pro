@@ -12,10 +12,11 @@ trap 'rm -rf "$TMPDIR"' EXIT
 cp "$ROOT/SKILL.md" "$TMPDIR/SKILL.md"
 
 echo "Publishing aiusd-pro v${VERSION} to ClawHub..."
-clawhub publish "$TMPDIR" \
+npx -y clawhub publish "$TMPDIR" \
   --slug aiusd-pro \
   --name "AIUSD Pro" \
   --version "$VERSION" \
-  --tags latest
+  --tags latest \
+  --registry https://www.clawhub.ai
 
 echo "Done."
