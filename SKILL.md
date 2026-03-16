@@ -1,5 +1,6 @@
 ---
 name: aiusd-pro
+version: 1.0.1
 description: "AIUSD Pro — AI-powered trading agent with built-in reasoning. Use when user wants to trade, check balances, or manage positions through natural language conversation."
 license: MIT
 compatibility: "Requires node >= 18"

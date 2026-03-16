@@ -5,15 +5,17 @@ on:
     branches: [main]
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-latest
+    outputs:
+      version_changed: ${{ steps.check.outputs.changed }}
+      version: ${{ steps.check.outputs.version }}
     permissions:
-      contents: write
-      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
       - uses: actions/setup-node@v4
         with:
@@ -26,16 +28,46 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Bump version & tag
+      - name: Check if version changed
+        id: check
         run: |
+          CURRENT=$(node -p "require('./package.json').version")
+          PREVIOUS=$(git show HEAD~1:package.json 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version" 2>/dev/null || echo "")
+          echo "version=${CURRENT}" >> "$GITHUB_OUTPUT"
+          if [ "$CURRENT" != "$PREVIOUS" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  publish:
+    needs: build
+    if: needs.build.outputs.version_changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Tag version
+        run: |
+          VERSION=${{ needs.build.outputs.version }}
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          npm version patch --no-git-tag-version
-          VERSION=$(node -p "require('./package.json').version")
-          git add package.json package-lock.json
-          git commit -m "chore: release v${VERSION}"
           git tag "v${VERSION}"
-          git push origin main --tags
+          git push origin "v${VERSION}"
 
       - name: Publish to npm
         run: npm publish --access public --provenance
@@ -44,7 +76,7 @@ jobs:
 
       - name: Create .skill archive
         run: |
-          VERSION=$(node -p "require('./package.json').version")
+          VERSION=${{ needs.build.outputs.version }}
           SKILL_DIR=$(mktemp -d)
           cp -r dist scripts package.json package-lock.json SKILL.md "$SKILL_DIR/"
           cd "$SKILL_DIR"

@@ -26,10 +26,18 @@ npx skills add galpha-ai/aiusd-pro -y -g
 
 ### OpenClaw
 
-Drag & drop the [.skill file](https://github.com/galpha-ai/aiusd-pro/releases/latest/download/aiusd-pro.skill) into your OpenClaw chat, or:
+Install from [ClawHub](https://clawhub.com):
 
 ```bash
-openclaw skill install aiusd-pro.skill
+clawhub install aiusd-pro
+```
+
+Or manually — download [SKILL.md](https://raw.githubusercontent.com/galpha-ai/aiusd-pro/main/SKILL.md) into your skills directory:
+
+```bash
+mkdir -p ~/.openclaw/skills/aiusd-pro
+curl -fsSL https://raw.githubusercontent.com/galpha-ai/aiusd-pro/main/SKILL.md \
+  -o ~/.openclaw/skills/aiusd-pro/SKILL.md
 ```
 
 ### npm
@@ -99,7 +107,7 @@ aiusd-pro cancel                # Cancel active operation
 | Claude Code | `npx skills add galpha-ai/aiusd-pro` |
 | Codex | `npx skills add galpha-ai/aiusd-pro` |
 | Cursor | `npx skills add galpha-ai/aiusd-pro` |
-| OpenClaw | `.skill` file or symlink |
+| OpenClaw | `clawhub install aiusd-pro` |
 | GitHub Copilot | Symlink to `.github/skills/` |
 
 ## Core vs. Pro
