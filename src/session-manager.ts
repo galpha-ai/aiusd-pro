@@ -49,6 +49,20 @@ export class SessionManager {
     return (await response.body.json()) as Session;
   }
 
+  async createShare(sessionId: string): Promise<{ share_token: string; created_at: string }> {
+    const response = await request(`${this.baseUrl}/sessions/${encodeURIComponent(sessionId)}/share`, {
+      method: 'POST',
+      headers: this.getHeaders({ 'Idempotency-Key': randomUUID() }),
+    });
+
+    if (response.statusCode !== 200 && response.statusCode !== 201) {
+      const body = await response.body.text();
+      throw new Error(`Failed to create share (${response.statusCode}): ${body}`);
+    }
+
+    return (await response.body.json()) as { share_token: string; created_at: string };
+  }
+
   async listSessions(limit: number = 20): Promise<SessionListResponse> {
     const params = new URLSearchParams({ pageSize: limit.toString() });
     const response = await request(`${this.baseUrl}/sessions?${params}`, {

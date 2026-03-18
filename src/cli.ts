@@ -50,15 +50,26 @@ export function createCli(): Command {
       const userId = extractUserId(rawToken);
 
       // 2. Get or create session
+      const sessionMgr = new SessionManager(userId, rawToken);
+
       let sessionId = opts.session || getCurrentSession();
       if (!sessionId) {
-        const mgr = new SessionManager(userId, rawToken);
-        const session = await mgr.createSession('aiusd-pro');
+        const session = await sessionMgr.createSession('aiusd-pro');
         sessionId = session.id;
         setCurrentSession(sessionId);
       }
 
       const timeoutMs = opts.timeout ? parseInt(opts.timeout, 10) : undefined;
+
+      // Helper: generate share URL with fallback to chat URL
+      async function getSessionUrl(mgr: SessionManager, sid: string): Promise<string> {
+        try {
+          const share = await mgr.createShare(sid);
+          return `https://aiusd.ai/share/${share.share_token}`;
+        } catch {
+          return `https://aiusd.ai/chat/${sid}`;
+        }
+      }
 
       // 3. Send message
       try {
@@ -70,15 +81,15 @@ export function createCli(): Command {
           verbose: opts.verbose,
           timeoutMs,
         });
-        process.stdout.write(`\nContinue this conversation in your browser: https://aiusd.ai/chat/${sessionId}\n`);
+        const url = await getSessionUrl(sessionMgr, sessionId);
+        process.stdout.write(`\nContinue this conversation in your browser: ${url}\n`);
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
 
         // Auto-recover from expired/invalid session
         if (msg.includes('returned 403') && !opts.session) {
           process.stderr.write('Session expired, creating new session...\n');
-          const mgr = new SessionManager(userId, rawToken);
-          const newSession = await mgr.createSession('aiusd-pro');
+          const newSession = await sessionMgr.createSession('aiusd-pro');
           sessionId = newSession.id;
           setCurrentSession(sessionId);
           try {
@@ -90,6 +101,8 @@ export function createCli(): Command {
               verbose: opts.verbose,
               timeoutMs,
             });
+            const url = await getSessionUrl(sessionMgr, sessionId);
+            process.stdout.write(`\nContinue this conversation in your browser: ${url}\n`);
             return;
           } catch (retryErr) {
             const retryMsg = retryErr instanceof Error ? retryErr.message : String(retryErr);
